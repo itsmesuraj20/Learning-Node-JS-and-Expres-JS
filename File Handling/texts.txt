@@ -1,0 +1,3 @@
+It is printing the Blocking at in the stack Because the it is synchronous behaviour 
+that means it does need to go in the thread pool by which it will assign a worker and after finishing up the work by the worker they send the response to user /client
+
