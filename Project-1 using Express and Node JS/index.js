@@ -15,6 +15,11 @@ const  PORT = 8000;
 
 app.use(express.urlencoded({extended : false}));
 
+
+app.use((req,res,next) =>{
+    
+})
+
 app.get('/users',(req,res) =>{
     const html = `
     <ul>
