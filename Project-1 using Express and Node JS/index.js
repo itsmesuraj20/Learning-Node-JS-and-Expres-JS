@@ -12,12 +12,12 @@ const  PORT = 8000;
 
 
 //Using MiddleWare
-
 app.use(express.urlencoded({extended : false}));
 
 
 app.use((req,res,next) =>{
-    
+    return res.json("Hello World MiddleWare 1")
+    next();
 })
 
 app.get('/users',(req,res) =>{
