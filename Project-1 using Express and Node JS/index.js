@@ -1,9 +1,40 @@
 //HOME WORK TO USE PATCH AND DELETE USING POSTMAN
 
 const express = require("express");
-const users = require("./MOCK_DATA.json");
+// const users = require("./MOCK_DATA.json");
 
 const fs = require("fs");
+const mongoose = require("mongoose");
+
+
+//Connecting Moongoose
+mongoose.connect('mongodb://127.0.0.1:27017/first-db').then(() => console.log("MongoDB Connect")).catch((err) => console.log("Mongo Error", err));
+
+
+//Schema
+const userSchema = new mongoose.Schema({
+  firstName:{
+    type: String,
+    required : true,
+  },
+  lastName:{
+    type: String,
+  },
+  email : {
+    type: String,
+    required : true,
+    unique: true,
+  },
+  gender : {
+    type: String,
+  },
+  job_title :{
+    type: String,
+  }
+},{ timestamps: true })
+
+//Model
+const User = mongoose.model('user', userSchema)
 
 const app = express();
 const PORT = 8000;
@@ -17,19 +48,20 @@ app.use(express.json({ extended: false }));
 //   next();
 // });
 
-app.get("/users", (req, res) => {
+app.get("/users", async (req, res) => {
+  const allDBUsers = await User.find({})
   const html = `
     <ul>
-    ${users.map((user) => `<li>${user.gender}</li>`).join("")}
+    ${allDBUsers.map((user) => `<li>${user.firstName}-${user.email}</li>`).join("")}
     </ul>
     `;
   return res.send(html);
 });
 
-app.get("/api/users", (req, res) => {
-  // It is a good practice that u should use /api/user to API purposes
-  return res.json(users);
-});
+// app.get("/api/users", (req, res) => {
+//   // It is a good practice that u should use /api/user to API purposes
+//   return res.json(users);
+// });
 
 app
   // .route("/api/users/:id")
@@ -40,7 +72,7 @@ app
   return res.json(user);
 });
 
-app.post("/api/users/", (req, res) => {
+app.post("/api/users/", async (req, res) => {
   const body = req.body;
   if (
     !body ||
@@ -52,11 +84,40 @@ app.post("/api/users/", (req, res) => {
   ) {
     return res.status(400).json({ msg: "All fields are req..." });
   }
-  users.push({ ...body, id: users.length + 1 });
-  fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err, data) => {
-    return res.status(201).json({ status: "success", id: users.length });
-  });
+  const result =  await User.create({
+    firstName : body.first_name,
+    lastName : body.last_name,
+    email :  body.email,
+    gender : body.gender,
+    job_title : body.job_title,
+  }); 
+
+  console.log("Result" ,result);
+
+  return res.status(201).json({msg: "Success"})
+
+
+
+  //In MongoDB we dont to need to push by this method 
+  // users.push({ ...body, id: users.length + 1 });
+  // fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err, data) => {
+  //   return res.status(201).json({ status: "success", id: users.length });
+  // });
 });
+
+
+//RestAPI
+app.get("/api/users" , async (req,res) =>{
+  const allDBUsers = await User.find({})
+
+  res.setHeader("X-MyName" , "Piyush Garg"); //Custom Header
+  //Always add X to custom headers
+  return res.json(allDBUsers);
+
+});
+
+
+
 
 // app.
 //     get('/api/users/:id',(req,res) =>{
